@@ -2,8 +2,7 @@ DESCRIPTION = "Copy binary to the image"
 LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
 BINARY = "entropy-tss"
-SRC_URI += "file://${BINARY}"
-SRC_URI += "file://init"
+SRC_URI = "file://${BINARY} file://init"
 S = "${WORKDIR}"
 
 INITSCRIPT_NAME = "${BINARY}"
@@ -17,8 +16,12 @@ do_install() {
         install -d ${D}${sysconfdir}/init.d
         cp init ${D}${sysconfdir}/init.d/${BINARY}
         chmod 755 ${D}${sysconfdir}/init.d/${BINARY}
+
+        ln -rs ${D}/lib ${D}/lib64
 }
-FILES_${PN} += "${bindir}"
+
+FILES:${PN} += "${bindir} /lib64"
+
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
 
