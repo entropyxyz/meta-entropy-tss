@@ -11,7 +11,7 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/entropy-tss
 NAME=entropy_tss_vc
-DESC="Validator Client"
+DESC="Entropy Threshold Signature Server"
 PIDFILE=/var/run/entropy_tss_vc.pid
 
 
@@ -19,7 +19,7 @@ start() {
         echo -n "Starting $DESC: "
         mount -o remount,size=90% /var/volatile
         start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
-                2>&1 | tee /tmp/log"
+                2>&1 | tee /tmp/entropy-tss-logs"
         echo "$NAME."
 }
 

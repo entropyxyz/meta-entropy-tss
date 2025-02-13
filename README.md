@@ -1,12 +1,12 @@
-## meta-entropy
-
-This repo is currently **work-in-progress**
+# meta-entropy
 
 Yocto layer with recipe for entropy-tss
 
-Currently this just copies in a pre-built binary rather than compiling it within Yocto.
+This repo is currently **work-in-progress**
 
-This is not the 'real' entropy-tss binary, but a simple axum-based http server which on getting a request generates a TDX quote and responds with some quote data
+Currently this copies in a pre-built binary rather than compiling it within Yocto.
+
+The included binary is not the 'real' entropy-tss binary, but a simple axum-based http server which on getting an HTTP request generates a TDX quote and responds with some quote data:
 
 Eg: 
 ```
@@ -43,9 +43,6 @@ source setup
 
 - `cd srcs/poky/meta-confidential-compute` and apply the following diff:
 
-TODO I think we should be able to modify `DISTRO_EXTRA_RDEPENDS` from `build/conf/local.conf` without needing to modify this repo
-TODO The kernel config option edit can be made into a PR to `flashbots/meta-confidential-compute` once we figure out what other options are needed to fix warnings and panic
-
 ```
 diff --git a/conf/distro/cvm.conf b/conf/distro/cvm.conf
 index 68c7a12..37ad2e3 100644
@@ -71,6 +68,9 @@ index 83c9421..2e0a3c2 100644
 +CONFIG_DMA_COHERENT_POOL=y
 ```
 
+- TODO I think we should be able to modify `DISTRO_EXTRA_RDEPENDS` from `build/conf/local.conf` without needing to modify this repo.
+- TODO The kernel config option edit can be made into a PR to `flashbots/meta-confidential-compute` once we figure out what other options are needed to fix warnings and panic.
+
 ### Build the image:
 
 ```
@@ -78,9 +78,9 @@ cd ../../..
 DEBUG_TWEAKS_ENABLED=1 MACHINE=tdx-gcp SSH_PUBKEY=<some ssh public key> make build
 ```
 
-TODO im not sure if `MACHINE ?= "tdx-gcp"` also needs to be set in `./srcs/poky/build/conf/local.conf`
+Alternatively, there are also [instructions for building with docker](https://github.com/flashbots/yocto-manifests?tab=readme-ov-file#alternative-build-with-docker) which works great - but i think to use it we will need to fork `flashbot/yocto-manifests` and put our changes there.
 
-There are also [instructions for building with docker](https://github.com/flashbots/yocto-manifests?tab=readme-ov-file#alternative-build-with-docker) which works great - but i think to use it we will need to fork `flashbot/yocto-manifests` and put our changes there.
+- TODO im not sure if `MACHINE ?= "tdx-gcp"` also needs to be set in `./srcs/poky/build/conf/local.conf`
 
 ### Copy the built image to a GCP bucket:
 
