@@ -28,7 +28,7 @@ It has an init script for the simple tiny-init system used by poky-tiny.
 
 ### Setup build environment
 
-- Install [repo](https://gerrit.googlesource.com/git-repo/+/HEAD/README.md)
+- [Install dependencies](https://github.com/flashbots/yocto-manifests/tree/main#preparing-your-host-for-non-docker-builds), most of which are fairly standard (python, gcc, GNU make, etc), but notably you need [repo](https://gerrit.googlesource.com/git-repo/+/HEAD/README.md).
 - Follow instructions from the [flashbots/yocto-manifests v3 refactor PR](https://github.com/flashbots/yocto-manifests/pull/20):
 
 ```
