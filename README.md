@@ -1,4 +1,4 @@
-# meta-entropy
+# meta-entropy-tss
 
 Yocto layer with recipe for entropy-tss
 
