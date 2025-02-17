@@ -24,5 +24,5 @@ python () {
         # add the debug-tweaks feature to the image if DEBUG_TWEAKS_ENABLED is set
         d.appendVar('IMAGE_FEATURES', ' debug-tweaks')
         # add dropbear to the package install list to be able to login for debugging purposes
-        d.appendVar('PACKAGE_INSTALL', ' dropbear ssh-key-injection')
+        d.appendVar('PACKAGE_INSTALL', ' dropbear')
 }
