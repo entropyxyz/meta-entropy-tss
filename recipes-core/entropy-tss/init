@@ -19,6 +19,7 @@ start() {
         echo -n "Starting $DESC: "
         mount -o remount,size=90% /var/volatile
         start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
+                --threshold-url 0.0.0.0:3001 \
                 2>&1 | tee /tmp/entropy-tss-logs"
         echo "$NAME."
 }
