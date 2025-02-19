@@ -27,7 +27,5 @@ FILES:${PN} += "${bindir} /lib64"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
 
-# Libssl is not needed for our mock entropy-tss http server
-# but for the 'real' entropy-tss binary, we need to uncomment these:
-# DEPENDS += " openssl"
-# RDEPENDS_${PN} += " libssl.so.3()(64bit)"
+DEPENDS += " openssl"
+RDEPENDS_${PN} += " libssl.so.3()(64bit)"
