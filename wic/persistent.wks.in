@@ -1,0 +1,1 @@
+part /persist --ondisk sda --fstype=ext4 --label persist
