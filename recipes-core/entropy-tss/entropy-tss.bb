@@ -2,13 +2,31 @@ DESCRIPTION = "Copy binary to the image"
 LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
 BINARY = "entropy-tss"
-SRC_URI = "file://${BINARY} file://init"
 S = "${WORKDIR}"
 
 INITSCRIPT_NAME = "${BINARY}"
 INITSCRIPT_PARAMS = "defaults 99"
 
 inherit update-rc.d
+
+python () {
+    entropy_tss_binary_uri = d.getVar('ENTROPY_TSS_BINARY_URI')
+
+    if entropy_tss_binary_uri is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            entropy_tss_binary_uri = origenv.getVar('ENTROPY_TSS_BINARY_URI')
+
+    if entropy_tss_binary_uri:
+        d.setVar('ENTROPY_TSS_BINARY_URI', entropy_tss_binary_uri)
+    else:
+        binary_name = d.getVar('BINARY')
+        d.setVar('ENTROPY_TSS_BINARY_URI', "file://" + binary_name)
+
+        bb.note("ENTROPY_TSS_BINARY_URI is set to: %s" % entropy_tss_binary_uri)
+}
+
+SRC_URI = "${ENTROPY_TSS_BINARY_URI} file://init"
 
 do_install() {
     install -d ${D}${bindir}
