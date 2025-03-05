@@ -11,7 +11,6 @@ inherit update-rc.d
 
 python () {
     import bb
-    import bb.fetch2
     import os
     import shutil
 
