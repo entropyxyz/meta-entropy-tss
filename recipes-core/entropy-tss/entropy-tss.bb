@@ -10,6 +10,11 @@ INITSCRIPT_PARAMS = "defaults 99"
 inherit update-rc.d
 
 python () {
+    import bb
+    import bb.fetch2
+    import os
+    import shutil
+
     entropy_tss_binary_uri = d.getVar('ENTROPY_TSS_BINARY_URI')
 
     if entropy_tss_binary_uri is None:
@@ -18,15 +23,26 @@ python () {
             entropy_tss_binary_uri = origenv.getVar('ENTROPY_TSS_BINARY_URI')
 
     if entropy_tss_binary_uri:
-        d.setVar('ENTROPY_TSS_BINARY_URI', entropy_tss_binary_uri)
-    else:
+        dest_dir = d.getVar('WORKDIR')
         binary_name = d.getVar('BINARY')
-        d.setVar('ENTROPY_TSS_BINARY_URI', "file://" + binary_name)
+        file_path = os.path.join(dest_dir, binary_name)
 
-        bb.note("ENTROPY_TSS_BINARY_URI is set to: %s" % entropy_tss_binary_uri)
+        # Download the file
+        fetcher = bb.fetch2.Fetch([entropy_tss_binary_uri], d)
+        fetcher.download()
+
+        # Move downloaded file to correct location / name
+        localpath = fetcher.localpath(entropy_tss_binary_uri)
+        shutil.move(localpath, file_path)
+        bb.plain(f"Downloaded {entropy_tss_binary_uri} to {file_path}")
+
+        os.chmod(file_path, 0o755)
+        bb.plain(f"Set executable permissions for {file_path}")
+    else:
+        bb.fatal("ENTROPY_TSS_BINARY_URI not set")
 }
 
-SRC_URI = "${ENTROPY_TSS_BINARY_URI} file://init"
+SRC_URI = "file:://${BINARY} file://init"
 
 do_install() {
     install -d ${D}${bindir}
