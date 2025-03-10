@@ -1,4 +1,4 @@
-DESCRIPTION = "Copy binary to the image"
+DESCRIPTION = "Compile entropy-tss"
 LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
 BINARY = "entropy-tss"
@@ -7,30 +7,22 @@ S = "${WORKDIR}"
 INITSCRIPT_NAME = "${BINARY}"
 INITSCRIPT_PARAMS = "defaults 99"
 
-inherit update-rc.d
+inherit cargo-bin update-rc.d
 
-python () {
-    entropy_tss_binary_uri = d.getVar('ENTROPY_TSS_BINARY_URI')
+# Enable network for the compile task allowing cargo to download dependencies
+do_compile[network] = "1"
 
-    if entropy_tss_binary_uri is None:
-        origenv = d.getVar("BB_ORIGENV", False)
-        if origenv:
-            entropy_tss_binary_uri = origenv.getVar('ENTROPY_TSS_BINARY_URI')
+SRC_URI = "git://github.com/entropy-xyz/entropy-core.git;branch=main"
+SRCREV = "1a04c4d37c8ce87ee3d737f75e24a84ed9729245"
 
-    if entropy_tss_binary_uri:
-        d.setVar('ENTROPY_TSS_BINARY_URI', entropy_tss_binary_uri)
-    else:
-        binary_name = d.getVar('BINARY')
-        d.setVar('ENTROPY_TSS_BINARY_URI', "file://" + binary_name)
+SRC_URI += "file://init"
 
-        bb.note("ENTROPY_TSS_BINARY_URI is set to: %s" % entropy_tss_binary_uri)
-}
+S = "${WORKDIR}/git"
 
-SRC_URI = "${ENTROPY_TSS_BINARY_URI} file://init"
+EXTRA_CARGO_FLAGS = "-p entropy-tss"
+CARGO_FEATURES = "production"
 
-do_install() {
-    install -d ${D}${bindir}
-    install -m 0777 ${BINARY} ${D}${bindir}
+do_install:append() {
     install -d ${D}${sysconfdir}/init.d
     cp init ${D}${sysconfdir}/init.d/${BINARY}
     chmod 755 ${D}${sysconfdir}/init.d/${BINARY}
