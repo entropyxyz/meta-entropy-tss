@@ -37,5 +37,5 @@ FILES:${PN} += "${bindir} /lib64"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
 
-DEPENDS += " openssl"
+DEPENDS += " openssl cargo-bin"
 RDEPENDS_${PN} += " libssl.so.3()(64bit)"
