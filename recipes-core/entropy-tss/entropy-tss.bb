@@ -15,7 +15,7 @@ do_compile[network] = "1"
 SRC_URI = "git://github.com/entropy-xyz/entropy-core.git;branch=main"
 SRCREV = "1a04c4d37c8ce87ee3d737f75e24a84ed9729245"
 
-SRC_URI += "file://init"
+SRC_URI += " file://init"
 
 S = "${WORKDIR}/git"
 
