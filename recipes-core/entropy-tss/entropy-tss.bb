@@ -1,10 +1,9 @@
 DESCRIPTION = "Compile entropy-tss"
 LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
-BINARY = "entropy-tss"
 S = "${WORKDIR}"
 
-INITSCRIPT_NAME = "${BINARY}"
+INITSCRIPT_NAME = "entropy-tss"
 INITSCRIPT_PARAMS = "defaults 99"
 
 inherit cargo-bin update-rc.d
@@ -12,7 +11,7 @@ inherit cargo-bin update-rc.d
 # Enable network for the compile task allowing cargo to download dependencies
 do_compile[network] = "1"
 
-SRC_URI = "git://github.com/entropy-xyz/entropy-core.git;branch=main"
+SRC_URI = "git://github.com/entropy-xyz/entropy-core.git;branch=master"
 SRCREV = "1a04c4d37c8ce87ee3d737f75e24a84ed9729245"
 
 # SRC_URI += " file://init"
@@ -36,8 +35,8 @@ do_install:append() {
 
 FILES:${PN} += "${bindir} /lib64"
 
-INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
-INHIBIT_PACKAGE_STRIP = "1"
+# INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
+# INHIBIT_PACKAGE_STRIP = "1"
 
 DEPENDS += " openssl"
 DEPENDS += "rust-bin-${RUST_BIN_VERSION} cargo-bin-${RUST_BIN_VERSION}"
