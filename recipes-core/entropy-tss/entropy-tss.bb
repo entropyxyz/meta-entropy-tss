@@ -19,6 +19,8 @@ SRC_URI += "file://init"
 
 S = "${WORKDIR}/git"
 
+RUST_TARGET="x86_64-unknown-linux-gnu"
+
 EXTRA_CARGO_FLAGS = "-p entropy-tss"
 CARGO_FEATURES = "production"
 
@@ -37,5 +39,6 @@ FILES:${PN} += "${bindir} /lib64"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
 
-DEPENDS += " openssl cargo-bin"
+DEPENDS += " openssl"
+DEPENDS += "rust-bin-${RUST_BIN_VERSION} cargo-bin-${RUST_BIN_VERSION}"
 RDEPENDS_${PN} += " libssl.so.3()(64bit)"
