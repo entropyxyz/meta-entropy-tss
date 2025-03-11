@@ -3,7 +3,7 @@ HOMEPAGE = "https://github.com/entropyxyz/entropy-core"
 LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
 
-inherit cargo_bin
+inherit cargo_bin update-rc.d
 
 INITSCRIPT_NAME = "entropy-tss"
 INITSCRIPT_PARAMS = "defaults 99"
@@ -21,7 +21,7 @@ SRC_URI += " file://init"
 
 do_install:append() {
     install -d ${D}${sysconfdir}/init.d
-    cp init ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
+    cp ${THISDIR}/init ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
     chmod 755 ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
 
     # This is needed because ldd entropy-tss reveals that our binary expects
