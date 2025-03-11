@@ -11,8 +11,8 @@ INITSCRIPT_PARAMS = "defaults 99"
 # Enable network for the compile task allowing cargo to download dependencies
 do_compile[network] = "1"
 
-SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master"
-SRCREV="1a04c4d37c8ce87ee3d737f75e24a84ed9729245"
+SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=peg/fix-tss-production-mode"
+SRCREV="ecd7c932c8468939d866cf8887a5e4694ddcef51"
 S = "${WORKDIR}/git"
 EXTRA_CARGO_FLAGS = "-p entropy-tss"
 CARGO_FEATURES = "production"
