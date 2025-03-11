@@ -1,49 +1,34 @@
-DESCRIPTION = "Copy binary to the image"
+SUMMARY = "Entropy TSS"
+HOMEPAGE = "https://github.com/entropyxyz/entropy-core"
 LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
-BINARY = "entropy-tss"
-S = "${WORKDIR}"
 
-INITSCRIPT_NAME = "${BINARY}"
+inherit cargo_bin update-rc.d
+
+INITSCRIPT_NAME = "entropy-tss"
 INITSCRIPT_PARAMS = "defaults 99"
 
-inherit update-rc.d
+# Enable network for the compile task allowing cargo to download dependencies
+do_compile[network] = "1"
 
-python () {
-    entropy_tss_binary_uri = d.getVar('ENTROPY_TSS_BINARY_URI')
+SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=peg/fix-tss-production-mode"
+SRCREV="ecd7c932c8468939d866cf8887a5e4694ddcef51"
+S = "${WORKDIR}/git"
+EXTRA_CARGO_FLAGS = "-p entropy-tss"
+CARGO_FEATURES = "production"
 
-    if entropy_tss_binary_uri is None:
-        origenv = d.getVar("BB_ORIGENV", False)
-        if origenv:
-            entropy_tss_binary_uri = origenv.getVar('ENTROPY_TSS_BINARY_URI')
+SRC_URI += " file://init"
 
-    if entropy_tss_binary_uri:
-        d.setVar('ENTROPY_TSS_BINARY_URI', entropy_tss_binary_uri)
-    else:
-        binary_name = d.getVar('BINARY')
-        d.setVar('ENTROPY_TSS_BINARY_URI', "file://" + binary_name)
-
-        bb.note("ENTROPY_TSS_BINARY_URI is set to: %s" % entropy_tss_binary_uri)
-}
-
-SRC_URI = "${ENTROPY_TSS_BINARY_URI} file://init"
-
-do_install() {
-    install -d ${D}${bindir}
-    install -m 0777 ${BINARY} ${D}${bindir}
+do_install:append() {
     install -d ${D}${sysconfdir}/init.d
-    cp init ${D}${sysconfdir}/init.d/${BINARY}
-    chmod 755 ${D}${sysconfdir}/init.d/${BINARY}
+    cp ${THISDIR}/init ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
+    chmod 755 ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
 
     # This is needed because ldd entropy-tss reveals that our binary expects
     # to find ld-linux-x86-64.so.2 in /lib64
     ln -rs ${D}/lib ${D}/lib64
 }
 
-FILES:${PN} += "${bindir} /lib64"
-
-INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
-INHIBIT_PACKAGE_STRIP = "1"
-
+FILES:${PN} += " /lib64"
 DEPENDS += " openssl"
 RDEPENDS_${PN} += " libssl.so.3()(64bit)"
