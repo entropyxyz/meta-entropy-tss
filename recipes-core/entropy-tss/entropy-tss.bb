@@ -1,6 +1,7 @@
 SUMMARY = "Entropy TSS"
 HOMEPAGE = "https://github.com/entropyxyz/entropy-core"
-LICENSE = "CLOSED"
+LICENSE = "AGPL-3.0-or-later"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=eb1e647870add0502f8f010b19de32af"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
 
 inherit cargo_bin update-rc.d
