@@ -1,12 +1,8 @@
 # meta-entropy-tss
 
-Yocto layer with recipe for entropy-tss
+Yocto layer with recipe for building and running [entropy-tss](https://github.com/entropyxyz/entropy-core/tree/master/crates/threshold-signature-server) in a confidential virtual machine.
 
-This repo is currently **work-in-progress**
-
-Currently this copies in a pre-built binary rather than compiling it within Yocto.
-
-To check measurement value, you can use the version endpoint:
+To check the measurement value, you can use the version endpoint:
 
 Eg: 
 ```
