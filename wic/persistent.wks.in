@@ -2,4 +2,4 @@ part /boot --source bootimg-efi --sourceparams="loader=systemd-boot,create-unifi
 
 bootloader --ptable gpt --timeout=0 --append="console=ttyS0,115200 console=tty0 ramdisk_size=402653184"
 
-part /persist --ondisk sdb --fstype=ext4 --label persist --size 10
+part /persist --ondisk sdc --fstype=ext4 --label persist --size 10
