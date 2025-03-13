@@ -2,4 +2,6 @@ part /boot --source bootimg-efi --sourceparams="loader=grub-efi,initrd=${INITRAM
 
 bootloader --ptable gpt --timeout=0 --append="console=ttyS0,38400n8 scsi_mod.use_blk_mq=Y console=tty0 ramdisk_size=402653184"
 
-part /persist --ondisk sdc --fstype=ext4 --label persist --size 10
+disk nvme1 --disk-size=15
+
+part /persist --ondisk nvme1 --fstype=ext4 --label persist --size 10
