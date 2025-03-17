@@ -19,7 +19,7 @@ start() {
         echo -n "Starting $DESC: "
         mount -o remount,size=90% /var/volatile
         mkdir -p /persist
-        mount -o remount /dev/nvme0n1p2 /persist
+        mount /dev/nvme0n1p2 /persist
         start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
                 2>&1 | tee /tmp/entropy-tss-logs"
         echo "$NAME."
@@ -28,6 +28,7 @@ start() {
 stop() {
         echo -n "Stopping $DESC: "
         start-stop-daemon -K -x "$DAEMON" -p $PIDFILE
+        umount /persist
         echo "$NAME."
 }
 case "$1" in
