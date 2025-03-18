@@ -13,13 +13,18 @@ DAEMON=/usr/bin/entropy-tss
 NAME=entropy_tss_vc
 DESC="Entropy Threshold Signature Server"
 PIDFILE=/var/run/entropy_tss_vc.pid
+PERSISTENT_DEVICE=/dev/nvme0n1p2
 
 
 start() {
         echo -n "Starting $DESC: "
         mount -o remount,size=90% /var/volatile
         mkdir -p /persist
-        mount /dev/nvme0n1p2 /persist
+        if mount | grep -q "^$PERSISTENT_DEVICE "; then
+                echo "$PERSISTENT_DEVICE is already mounted."
+        else
+                mount $PERSISTENT_DEVICE /persist
+        fi
         start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
                 2>&1 | tee /tmp/entropy-tss-logs"
         echo "$NAME."
@@ -28,7 +33,6 @@ start() {
 stop() {
         echo -n "Stopping $DESC: "
         start-stop-daemon -K -x "$DAEMON" -p $PIDFILE
-        umount /persist
         echo "$NAME."
 }
 case "$1" in
