@@ -28,4 +28,4 @@ INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
 
 DEPENDS += " openssl"
-RDEPENDS_${PN} += " libssl.so.3()(64bit) parted"
+RDEPENDS_${PN} += " libssl.so.3()(64bit)"
