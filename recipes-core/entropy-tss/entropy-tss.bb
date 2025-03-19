@@ -39,8 +39,8 @@ python do_set_source_date_epoch() {
 # Add the source date epoch task to run after unpacking and before compiling
 addtask set_source_date_epoch after do_unpack before do_compile
 
-SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=peg/fix-tss-production-mode"
-SRCREV="ecd7c932c8468939d866cf8887a5e4694ddcef51"
+SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master"
+SRCREV="d3660102c9009fa96e309532a2e48f428f031840"
 S = "${WORKDIR}/git"
 EXTRA_CARGO_FLAGS = "-p entropy-tss"
 CARGO_FEATURES = "production"
