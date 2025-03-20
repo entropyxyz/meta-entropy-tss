@@ -18,6 +18,8 @@ PIDFILE=/var/run/entropy_tss_vc.pid
 start() {
         echo -n "Starting $DESC: "
         mount -o remount,size=90% /var/volatile
+        # This is a mock placeholder for the persistent fs until https://github.com/entropyxyz/meta-entropy-tss/pull/5 is merged
+        mkdir -p /persist
         start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
                 --threshold-url 0.0.0.0:3001 \
                 2>&1 | tee /tmp/entropy-tss-logs"
