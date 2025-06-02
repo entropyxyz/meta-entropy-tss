@@ -1,11 +1,40 @@
-SUMMARY = "Entropy TSS"
+SUMMARY = "Entropy CVM Image"
 HOMEPAGE = "https://github.com/entropyxyz/entropy-core"
 LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
 
 inherit cargo_bin update-rc.d
 
-INITSCRIPT_NAME = "entropy-tss"
+python () {
+    cvm_service_name = d.getVar('CVM_SERVICE_NAME')
+
+    if cvm_service_name is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            cvm_service_name = origenv.getVar('CVM_SERVICE_NAME')
+
+    if cvm_service_name:
+        d.setVar('CVM_SERVICE_NAME', cvm_service_name)
+        bb.note("CVM_SERVICE_NAME is set to: %s" % cvm_service_name)
+    else:
+        bb.note("No CVM_SERVICE_NAME is set. Defaulting to entropy-tss")
+        d.setVar('CVM_SERVICE_NAME', 'entropy-tss')
+
+    if cvm_service_name == "entropy-tss":
+        SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master"
+        SRCREV="d3660102c9009fa96e309532a2e48f428f031840"
+        EXTRA_CARGO_FLAGS = "-p entropy-tss"
+        CARGO_FEATURES = "production"
+    elif cvm_service_name == "api_key_tdx":
+        SRC_URI = "git://github.com/entropyxyz/api_key_tdx.git;protocol=https;branch=master"
+        SRCREV="dff00456221dfe48d12dc9af416e2bc456a51c78"
+        EXTRA_CARGO_FLAGS = ""
+        CARGO_FEATURES = "production"
+    else:
+        bb.fatal("CVM_SERVICE_NAME must be either `entropy-tss` or `api_key_tdx`")
+}
+
+INITSCRIPT_NAME = "${CVM_SERVICE_NAME}"
 INITSCRIPT_PARAMS = "defaults 99"
 
 # Remove build ID for better reproducibility
@@ -39,17 +68,13 @@ python do_set_source_date_epoch() {
 # Add the source date epoch task to run after unpacking and before compiling
 addtask set_source_date_epoch after do_unpack before do_compile
 
-SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master"
-SRCREV="d3660102c9009fa96e309532a2e48f428f031840"
 S = "${WORKDIR}/git"
-EXTRA_CARGO_FLAGS = "-p entropy-tss"
-CARGO_FEATURES = "production"
 
-SRC_URI += " file://init"
+SRC_URI += " file://init-${CVM_SERVICE_NAME}"
 
 do_install:append() {
     install -d ${D}${sysconfdir}/init.d
-    cp ${THISDIR}/init ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
+    cp ${THISDIR}/init-${CVM_SERVICE_NAME} ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
     chmod 755 ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
 
     # This is needed because ldd entropy-tss reveals that our binary expects
