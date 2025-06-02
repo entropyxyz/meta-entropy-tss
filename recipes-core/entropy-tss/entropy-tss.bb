@@ -17,8 +17,8 @@ python () {
         d.setVar('CVM_SERVICE_NAME', cvm_service_name)
         bb.note("CVM_SERVICE_NAME is set to: %s" % cvm_service_name)
     else:
-        bb.note("No CVM_SERVICE_NAME is set. Defaulting to entropy-tss")
-        d.setVar('CVM_SERVICE_NAME', 'entropy-tss')
+        bb.note("No CVM_SERVICE_NAME is set. Defaulting to api_key_tdx")
+        d.setVar('CVM_SERVICE_NAME', 'api_key_tdx')
 
     if cvm_service_name == "entropy-tss":
         SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master"
