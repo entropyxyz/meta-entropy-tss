@@ -29,7 +29,6 @@ python () {
         SRC_URI = "git://github.com/entropyxyz/api_key_tdx.git;protocol=https;branch=master"
         SRCREV="dff00456221dfe48d12dc9af416e2bc456a51c78"
         EXTRA_CARGO_FLAGS = ""
-        CARGO_FEATURES = "production"
     else:
         bb.fatal("CVM_SERVICE_NAME must be either `entropy-tss` or `api_key_tdx`")
 }
@@ -47,26 +46,6 @@ CARGO_PROFILE_RELEASE_INCREMENTAL = "false"
 
 # Enable network for the compile task allowing cargo to download dependencies
 do_compile[network] = "1"
-
-# Python function to set SOURCE_DATE_EPOCH for reproducible builds
-python do_set_source_date_epoch() {
-    import subprocess
-    import time
-
-    # Get the commit date of the latest commit
-    cmd = f"git -C {d.getVar('S')} log -1 --pretty=%ct"
-    commit_date = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
-
-    # Set SOURCE_DATE_EPOCH to the commit date
-    d.setVar('SOURCE_DATE_EPOCH', commit_date)
-
-    # Log the date for debugging
-    human_date = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(commit_date)))
-    bb.note(f"Set SOURCE_DATE_EPOCH to {commit_date} ({human_date} UTC)")
-}
-
-# Add the source date epoch task to run after unpacking and before compiling
-addtask set_source_date_epoch after do_unpack before do_compile
 
 S = "${WORKDIR}/git"
 
