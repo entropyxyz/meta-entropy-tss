@@ -24,7 +24,7 @@ python () {
         bb.note("Building entropy-tss")
         d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master")
         d.setVar('SRCREV', "d3660102c9009fa96e309532a2e48f428f031840")
-        d.setVar('EXTRA_CARGO_FLAGS, "-p entropy-tss")
+        d.setVar('EXTRA_CARGO_FLAGS', "-p entropy-tss")
         d.setVar('CARGO_FEATURES', "production")
     elif cvm_service_name == "api_key_tdx":
         bb.note("Building api_key_tdx")
