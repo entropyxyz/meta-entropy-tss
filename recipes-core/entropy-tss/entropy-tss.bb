@@ -21,14 +21,16 @@ python () {
         d.setVar('CVM_SERVICE_NAME', 'api_key_tdx')
 
     if cvm_service_name == "entropy-tss":
-        SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master"
-        SRCREV="d3660102c9009fa96e309532a2e48f428f031840"
-        EXTRA_CARGO_FLAGS = "-p entropy-tss"
-        CARGO_FEATURES = "production"
+        bb.note("Building entropy-tss")
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master")
+        d.setVar('SRCREV', "d3660102c9009fa96e309532a2e48f428f031840")
+        d.setVar('EXTRA_CARGO_FLAGS, "-p entropy-tss")
+        d.setVar('CARGO_FEATURES', "production")
     elif cvm_service_name == "api_key_tdx":
-        SRC_URI = "git://github.com/entropyxyz/api_key_tdx.git;protocol=https;branch=master"
-        SRCREV="dff00456221dfe48d12dc9af416e2bc456a51c78"
-        EXTRA_CARGO_FLAGS = ""
+        bb.note("Building api_key_tdx")
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/api_key_tdx.git;protocol=https;branch=master")
+        d.setVar('SRCREV', "dff00456221dfe48d12dc9af416e2bc456a51c78")
+        d.setVar('EXTRA_CARGO_FLAGS', "")
     else:
         bb.fatal("CVM_SERVICE_NAME must be either `entropy-tss` or `api_key_tdx`")
 }
