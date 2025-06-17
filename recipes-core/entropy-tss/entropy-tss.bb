@@ -21,22 +21,49 @@ python () {
         # bb.note("No CVM_SERVICE_NAME is set. Defaulting to entropy-tss")
         # d.setVar('CVM_SERVICE_NAME', 'entropy-tss')
 
+
+    cvm_service_src_rev = d.getVar('CVM_SERVICE_SRC_REV')
+
+    if cvm_service_src_rev is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            cvm_service_src_rev = origenv.getVar('CVM_SERVICE_SRC_REV')
+
+    if cvm_service_src_rev:
+        d.setVar('SRCREV', cvm_service_src_rev)
+        bb.note("SRCREV is set to: %s" % cvm_service_src_rev)
+    else:
+        bb.fatal("CVM_SERVICE_SRC_REV must be set to the desired commit hash of the crate to build")
+
+    cvm_service_src_branch = d.getVar('CVM_SERVICE_SRC_BRANCH')
+
+    if cvm_service_src_branch is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            cvm_service_src_branch = origenv.getVar('CVM_SERVICE_SRC_BRANCH')
+
+    if cvm_service_src_branch:
+        bb.note("Source branch is set to: %s" % cvm_service_src_branch)
+        cvm_service_src_branch = ";branch=" + cvm_service_src_branch 
+    else:
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https")
+        bb.note("Using default source branch")
+
     if cvm_service_name == "entropy-tss":
         bb.note("Building entropy-tss")
-        d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master")
-        d.setVar('SRCREV', "d3660102c9009fa96e309532a2e48f428f031840")
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https" + cvm_service_src_branch)
         d.setVar('EXTRA_CARGO_FLAGS', "-p entropy-tss")
         d.setVar('CARGO_FEATURES', "production")
     elif cvm_service_name == "api_key_tdx":
         bb.note("Building api_key_tdx")
-        d.setVar('SRC_URI', "git://github.com/entropyxyz/api_key_tdx.git;protocol=https;branch=master")
-        d.setVar('SRCREV', "dff00456221dfe48d12dc9af416e2bc456a51c78")
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/api_key_tdx.git;protocol=https" + cvm_service_src_branch)
         d.setVar('EXTRA_CARGO_FLAGS', "")
     else:
         bb.fatal("CVM_SERVICE_NAME must be either `entropy-tss` or `api_key_tdx`")
 }
 
 INITSCRIPT_NAME = "${CVM_SERVICE_NAME}"
+
 INITSCRIPT_PARAMS = "defaults 99"
 
 # Remove build ID for better reproducibility
@@ -49,6 +76,26 @@ CARGO_PROFILE_RELEASE_INCREMENTAL = "false"
 
 # Enable network for the compile task allowing cargo to download dependencies
 do_compile[network] = "1"
+
+# Python function to set SOURCE_DATE_EPOCH for reproducible builds
+python do_set_source_date_epoch() {
+    import subprocess
+    import time
+
+    # Get the commit date of the latest commit
+    cmd = f"git -C {d.getVar('S')} log -1 --pretty=%ct"
+    commit_date = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+
+    # Set SOURCE_DATE_EPOCH to the commit date
+    d.setVar('SOURCE_DATE_EPOCH', commit_date)
+
+    # Log the date for debugging
+    human_date = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(commit_date)))
+    bb.note(f"Set SOURCE_DATE_EPOCH to {commit_date} ({human_date} UTC)")
+}
+
+# Add the source date epoch task to run after unpacking and before compiling
+addtask set_source_date_epoch after do_unpack before do_compile
 
 S = "${WORKDIR}/git"
 
