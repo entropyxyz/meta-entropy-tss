@@ -1,4 +1,4 @@
-SUMMARY = "Entropy TSS"
+SUMMARY = "Entropy CVM Image"
 HOMEPAGE = "https://github.com/entropyxyz/entropy-core"
 LICENSE = "CLOSED"
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
@@ -6,6 +6,22 @@ FILESEXTRAPATHS:prepend := "${THISDIR}:"
 inherit cargo_bin update-rc.d
 
 python () {
+    cvm_service_name = d.getVar('CVM_SERVICE_NAME')
+
+    if cvm_service_name is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            cvm_service_name = origenv.getVar('CVM_SERVICE_NAME')
+
+    if cvm_service_name:
+        d.setVar('CVM_SERVICE_NAME', cvm_service_name)
+        bb.note("CVM_SERVICE_NAME is set to: %s" % cvm_service_name)
+    else:
+        bb.fatal("CVM_SERVICE_NAME must be either `entropy-tss` or `api_key_tdx`")
+        # bb.note("No CVM_SERVICE_NAME is set. Defaulting to entropy-tss")
+        # d.setVar('CVM_SERVICE_NAME', 'entropy-tss')
+
+
     cvm_service_src_rev = d.getVar('CVM_SERVICE_SRC_REV')
 
     if cvm_service_src_rev is None:
@@ -27,14 +43,27 @@ python () {
             cvm_service_src_branch = origenv.getVar('CVM_SERVICE_SRC_BRANCH')
 
     if cvm_service_src_branch:
-        d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=" + cvm_service_src_branch)
         bb.note("Source branch is set to: %s" % cvm_service_src_branch)
+        cvm_service_src_branch = ";branch=" + cvm_service_src_branch 
     else:
         d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https")
         bb.note("Using default source branch")
+
+    if cvm_service_name == "entropy-tss":
+        bb.note("Building entropy-tss")
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https" + cvm_service_src_branch)
+        d.setVar('EXTRA_CARGO_FLAGS', "-p entropy-tss")
+        d.setVar('CARGO_FEATURES', "production")
+    elif cvm_service_name == "api_key_tdx":
+        bb.note("Building api_key_tdx")
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/api_key_tdx.git;protocol=https" + cvm_service_src_branch)
+        d.setVar('EXTRA_CARGO_FLAGS', "")
+    else:
+        bb.fatal("CVM_SERVICE_NAME must be either `entropy-tss` or `api_key_tdx`")
 }
 
-INITSCRIPT_NAME = "entropy-tss"
+INITSCRIPT_NAME = "${CVM_SERVICE_NAME}"
+
 INITSCRIPT_PARAMS = "defaults 99"
 
 # Remove build ID for better reproducibility
@@ -69,14 +98,12 @@ python do_set_source_date_epoch() {
 addtask set_source_date_epoch after do_unpack before do_compile
 
 S = "${WORKDIR}/git"
-EXTRA_CARGO_FLAGS = "-p entropy-tss"
-CARGO_FEATURES = "production"
 
-SRC_URI += " file://init"
+SRC_URI += " file://init-${CVM_SERVICE_NAME}"
 
 do_install:append() {
     install -d ${D}${sysconfdir}/init.d
-    cp ${THISDIR}/init ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
+    cp ${THISDIR}/init-${CVM_SERVICE_NAME} ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
     chmod 755 ${D}${sysconfdir}/init.d/${INITSCRIPT_NAME}
 
     # This is needed because ldd entropy-tss reveals that our binary expects
