@@ -22,7 +22,7 @@ start() {
         mkdir -p /persist
         start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
                 --threshold-url 0.0.0.0:3001 \
-                --chain-endpoint ws://chain-endpoint.internal \
+                --chain-endpoint ws://chain-endpoint.entropy.internal:9944 \
                 2>&1 | tee /tmp/entropy-tss-logs"
         echo "$NAME."
 }
