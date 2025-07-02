@@ -13,16 +13,21 @@ DAEMON=/usr/bin/entropy-tss
 NAME=entropy_tss_vc
 DESC="Entropy Threshold Signature Server"
 PIDFILE=/var/run/entropy_tss_vc.pid
+PERSISTENT_DEVICE=/dev/nvme0n1p2
 
 
 start() {
         echo -n "Starting $DESC: "
         mount -o remount,size=90% /var/volatile
-        # This is a mock placeholder for the persistent fs until https://github.com/entropyxyz/meta-entropy-tss/pull/5 is merged
         mkdir -p /persist
+        if mount | grep -q "^$PERSISTENT_DEVICE "; then
+                echo "$PERSISTENT_DEVICE is already mounted."
+        else
+                mount $PERSISTENT_DEVICE /persist
+        fi
         start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
                 --threshold-url 0.0.0.0:3001 \
-                2>&1 | tee /tmp/entropy-tss-logs"
+                2>&1 | tee /persist/entropy-tss-logs-$(date +"%Y%m%d_%H%M%S")"
         echo "$NAME."
 }
 
