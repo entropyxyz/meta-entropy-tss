@@ -5,6 +5,35 @@ FILESEXTRAPATHS:prepend := "${THISDIR}:"
 
 inherit cargo_bin update-rc.d
 
+python () {
+    cvm_service_src_rev = d.getVar('CVM_SERVICE_SRC_REV')
+
+    if cvm_service_src_rev is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            cvm_service_src_rev = origenv.getVar('CVM_SERVICE_SRC_REV')
+
+    if cvm_service_src_rev:
+        d.setVar('SRCREV', cvm_service_src_rev)
+        bb.note("SRCREV is set to: %s" % cvm_service_src_rev)
+    else:
+        bb.fatal("CVM_SERVICE_SRC_REV must be set to the desired commit hash of the crate to build")
+
+    cvm_service_src_branch = d.getVar('CVM_SERVICE_SRC_BRANCH')
+
+    if cvm_service_src_branch is None:
+        origenv = d.getVar("BB_ORIGENV", False)
+        if origenv:
+            cvm_service_src_branch = origenv.getVar('CVM_SERVICE_SRC_BRANCH')
+
+    if cvm_service_src_branch:
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=" + cvm_service_src_branch)
+        bb.note("Source branch is set to: %s" % cvm_service_src_branch)
+    else:
+        d.setVar('SRC_URI', "git://github.com/entropyxyz/entropy-core.git;protocol=https")
+        bb.note("Using default source branch")
+}
+
 INITSCRIPT_NAME = "entropy-tss"
 INITSCRIPT_PARAMS = "defaults 99"
 
@@ -39,8 +68,6 @@ python do_set_source_date_epoch() {
 # Add the source date epoch task to run after unpacking and before compiling
 addtask set_source_date_epoch after do_unpack before do_compile
 
-SRC_URI = "git://github.com/entropyxyz/entropy-core.git;protocol=https;branch=master"
-SRCREV="d3660102c9009fa96e309532a2e48f428f031840"
 S = "${WORKDIR}/git"
 EXTRA_CARGO_FLAGS = "-p entropy-tss"
 CARGO_FEATURES = "production"
