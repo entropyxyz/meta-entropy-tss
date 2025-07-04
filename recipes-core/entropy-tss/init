@@ -14,14 +14,34 @@ NAME=entropy_tss_vc
 DESC="Entropy Threshold Signature Server"
 PIDFILE=/var/run/entropy_tss_vc.pid
 
+METADATA_KEY="chain-endpoint"
+METADATA_URL="http://metadata.google.internal/computeMetadata/v1/instance/attributes"
+RETRIES=35
+
+# For GCP, get chain endpoint from metadata
+get_config_from_metadata() {
+    if [ -n "$CHAIN_ENDPOINT" ]; then
+        echo "CHAIN_ENDPOINT is already set: $CHAIN_ENDPOINT"
+    else
+        echo "CHAIN_ENDPOINT not set, attempting to fetch from metadata..."
+        for i in $(seq 1 $RETRIES); do
+            CHAIN_ENDPOINT=$(wget --header="Metadata-Flavor: Google" -qO - "${METADATA_URL}/${METADATA_KEY}") && break
+            echo "Retry $i failed"
+            sleep 5
+        done
+    fi
+}
+
 
 start() {
         echo -n "Starting $DESC: "
         mount -o remount,size=90% /var/volatile
         # This is a mock placeholder for the persistent fs until https://github.com/entropyxyz/meta-entropy-tss/pull/5 is merged
         mkdir -p /persist
+        get_config_from_metadata
         start-stop-daemon -S -p $PIDFILE -N -10 -b -a /bin/sh -- -c "exec ${DAEMON} \
                 --threshold-url 0.0.0.0:3001 \
+                --chain-endpoint $CHAIN_ENDPOINT \
                 2>&1 | tee /tmp/entropy-tss-logs"
         echo "$NAME."
 }
