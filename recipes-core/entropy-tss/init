@@ -16,6 +16,7 @@ PIDFILE=/var/run/entropy_tss_vc.pid
 
 METADATA_KEY="chain-endpoint"
 METADATA_URL="http://metadata.google.internal/computeMetadata/v1/instance/attributes"
+RETRIES=35
 
 # For GCP, get chain endpoint from metadata
 get_config_from_metadata() {
@@ -23,8 +24,11 @@ get_config_from_metadata() {
         echo "CHAIN_ENDPOINT is already set: $CHAIN_ENDPOINT"
     else
         echo "CHAIN_ENDPOINT not set, attempting to fetch from metadata..."
-        CHAIN_ENDPOINT=$(wget --header="Metadata-Flavor: Google" --tries=35 --waitretry=30 -qO - "${METADATA_URL}/${METADATA_KEY}") \
-           || echo "Failed to set chain endpoint"
+        for i in $(seq 1 $RETRIES); do
+            CHAIN_ENDPOINT=$(wget --header="Metadata-Flavor: Google" -qO - "${METADATA_URL}/${METADATA_KEY}") && break
+            echo "Retry $i failed"
+            sleep 5
+        done
     fi
 }
 
